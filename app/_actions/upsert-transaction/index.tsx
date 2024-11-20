@@ -21,27 +21,17 @@ interface UpsertTransactionParams {
 }
 
 export const upsertTransaction = async (params: UpsertTransactionParams) => {
-  console.log("Received params:", params);
   upsertTransactionSchema.parse(params);
-
   const { userId } = await auth();
   if (!userId) {
     throw new Error("Unauthorized");
   }
-
-  if (params.id) {
-    // Atualização
-    await db.transaction.upsert({
-      where: { id: params.id },
-      update: { ...params, userId },
-      create: { ...params, userId },
-    });
-  } else {
-    // Criação
-    await db.transaction.create({
-      data: { ...params, userId },
-    });
-  }
-
+  await db.transaction.upsert({
+    update: { ...params, userId },
+    create: { ...params, userId },
+    where: {
+      id: params?.id ?? "",
+    },
+  });
   revalidatePath("/transactions");
 };
