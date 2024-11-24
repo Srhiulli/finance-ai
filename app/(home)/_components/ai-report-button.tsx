@@ -12,7 +12,6 @@ import {
   DialogTrigger,
 } from "@/app/_components/ui/dialog";
 import { BotIcon, Loader2Icon } from "lucide-react";
-import { generateAiReport } from "../_actions/genarate-ai-report";
 import { useState } from "react";
 import { ScrollArea } from "@/app/_components/ui/scroll-area";
 import Markdown from "react-markdown";
@@ -29,11 +28,21 @@ const AiReportButton = ({ month, hasPremiumPlan }: AiReportButtonProps) => {
   const handleGenerateReportClick = async () => {
     try {
       setReportIsLoading(true);
-      const aiReport = await generateAiReport({ month });
-      console.log({ aiReport });
-      setReport(aiReport);
+      const response = await fetch("/api/generate-ai-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ month }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao gerar relatório");
+      }
+
+      const data = await response.json();
+      setReport(data.report);
     } catch (error) {
       console.error(error);
+      setReport("Erro ao gerar relatório. Tente novamente.");
     } finally {
       setReportIsLoading(false);
     }

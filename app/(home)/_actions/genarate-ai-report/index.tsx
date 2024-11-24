@@ -48,5 +48,10 @@ export const generateAiReport = async ({ month }: GenerateAiReportSchema) => {
     )
     .join(";")}`;
   // pegar o relatório gerado pelo GEMINI e retornar para o usuário
-  return await model.generateContent(prompt);
+  const result = await model.generateContent(prompt);
+
+  // Verificando se existem candidatos e partes antes de acessar o texto
+  const text = result.response.candidates?.[0]?.content?.parts?.[0]?.text;
+
+  return text;
 };
